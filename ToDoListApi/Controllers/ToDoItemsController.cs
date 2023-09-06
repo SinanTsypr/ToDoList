@@ -72,7 +72,7 @@ namespace ToDoListApi.Controllers
             if (id != toDoItem.Id)
                 return BadRequest();
 
-            if (_db.ToDoItems.Any(x => x.Id == id))
+            if (!_db.ToDoItems.Any(x => x.Id == id))
                 return NotFound();
 
             if (ModelState.IsValid)
