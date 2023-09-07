@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="css/style.css" />
+    <title>To-Do List</title>
+  </head>
+  <body>
+    <h1>To-Do List</h1>
+    <form id="frmNew">
+      <input id="txtTitle" type="text" placeholder="Do something.." required />
+      <button>Add</button>
+    </form>
+    <div id="todos" class="todos"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
+    <script>
+      const apiUrl = "https://localhost:7095/api/ToDoItems";
+      let todos = [];
+      const divTodos = document.getElementById("todos");
+      const frmNew = document.getElementById("frmNew");
+      const txtTitle = document.getElementById("txtTitle");
+
+      // axios.get(apiUrl).then(res => console.log(res.data));
+
+      // form submit olduğunda yeni todo ekle
+      frmNew.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const newTodo = {
+          title: txtTitle.value,
+          done: false,
+        };
+
+        axios.post(apiUrl, newTodo).then(function (res) {
+          console.log(res.data);
+          getTodos();
+          txtTitle.value = "";
+        });
+      });
+
+      function getTodos() {
+        axios.get(apiUrl).then(function (res) {
+          todos = res.data;
+          list();
+        });
+      }
+
+      function list() {
+        divTodos.innerHTML = "";
+        for (const item of todos) {
+          const div = document.createElement("div");
+          div.className = item.done ? "done" : "undone";
+          div.classList.add("todo-item");
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.checked = item.done;
+          input.addEventListener("change", function () {
+            axios
+              .put(apiUrl + "/" + item.id, {
+                id: item.id,
+                title: item.title,
+                done: !item.done,
+              })
+              .then(function (res) {
+                getTodos();
+              });
+          });
+          div.appendChild(input);
+          const span = document.createElement("span");
+          span.textContent = item.title;
+          div.appendChild(span);
+          // silme butonu
+          const btnDelete = document.createElement("button");
+          btnDelete.textContent = "Delete";
+          btnDelete.addEventListener("click", function () {
+            axios.delete(apiUrl + "/" + item.id).then(function (res) {
+              getTodos();
+            });
+          });
+          div.appendChild(btnDelete);
+          divTodos.appendChild(div);
+        }
+      }
+
+      getTodos();
+      //   fetch(apiUrl)
+      //     .then((res) => res.json())
+      //     .then((data) => {
+      //       console.table(data);
+      //     });
+    </script>
+  </body>
+</html>

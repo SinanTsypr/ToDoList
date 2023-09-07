@@ -11,6 +11,11 @@ namespace ToDoListApi
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            builder.Services.AddCors(s => s.AddDefaultPolicy(p => p
+                                                            .AllowAnyHeader()
+                                                            .AllowAnyMethod()
+                                                            .AllowAnyOrigin()));
+
             var con = builder.Configuration.GetConnectionString("ApplicationDbContext");
             builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(con));
 
@@ -29,6 +34,8 @@ namespace ToDoListApi
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors(); //*****************************
 
             app.UseAuthorization();
 
